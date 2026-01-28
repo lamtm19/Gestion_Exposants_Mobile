@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Gestion Exposants</title>
+    
+    <style>
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    background-color: #f0f2f5;
+    font-size: 22px;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    padding: 30px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    width: 100vw;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 36px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 2px;
+    padding: 0 10px;
+  }
+
+  .search-container {
+    padding: 20px 0;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    width: 100vw;
+    position: sticky;
+    top: 116px;
+    z-index: 99;
+  }
+
+  #searchInput {
+    width: calc(100% - 40px);
+    margin: 0 20px;
+    padding: 16px 20px;
+    font-size: 22px;
+    border: 6px solid #e0e0e0;
+    border-radius: 25px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  #searchInput:focus {
+    border-color: #4CAF50;
+  }
+
+  #searchInput::placeholder {
+    font-size: 22px;
+  }
+
+  #exposantList {
+    padding: 20px 0;
+    padding-bottom: 150px;
+    width: 100vw;
+  }
+
+  .exposant {
+    background-color: white;
+    padding: 25px 20px;
+    margin: 0 0 25px 0;
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    width: 100vw;
+    /* OPTIMISATION: Utiliser transform au lieu de margin pour l'animation */
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .exposant:active {
+    transform: scale(0.99);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  }
+
+  .exposant h2 {
+    margin: 0 0 20px 0;
+    font-size: 28px;
+    color: #2c3e50;
+    font-weight: 800;
+    text-align: center;
+    padding: 0 0 16px 0;
+    border-bottom: 4px solid #4CAF50;
+    line-height: 1.3;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+
+  .info-grid {
+    margin-bottom: 20px;
+    width: 100%;
+    padding: 0 10px;
+  }
+
+  .info-item {
+    background: #f8f9fa;
+    padding: 16px 18px;
+    border-radius: 25px;
+    font-size: 20px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 60px;
+    width: 100%;
+  }
+
+  .info-label {
+    color: #6c757d;
+    font-size: 20px;
+    font-weight: 600;
+    flex: 1;
+    line-height: 1.3;
+  }
+
+  .info-value {
+    color: #2c3e50;
+    font-weight: 900;
+    font-size: 24px;
+    background: white;
+    padding: 10px 16px;
+    border-radius: 20px;
+    min-width: 60px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    margin-left: 15px;
+  }
+
+  textarea {
+    width: calc(100% - 40px);
+    margin: 0 20px 20px 20px;
+    padding: 16px 20px;
+    font-size: 20px;
+    border: 6px solid #e0e0e0;
+    border-radius: 25px;
+    resize: vertical;
+    min-height: 200px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.5;
+  }
+
+  textarea:focus {
+    border-color: #4CAF50;
+  }
+
+  textarea::placeholder {
+    color: #adb5bd;
+    font-size: 20px;
+  }
+
+  .button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    padding: 0 20px;
+  }
+
+  button {
+    padding: 20px 25px;
+    font-size: 24px;
+    font-weight: 800;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: white;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    width: 100%;
+    min-height: 80px;
+    position: relative;
+  }
+
+  .btn-arrivee {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  }
+
+  .btn-depart {
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  }
+
+  button:active:not(:disabled) {
+    transform: scale(0.97);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: #6c757d;
+  }
+
+  .empty-state p {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.5;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 80px 20px;
+    color: #6c757d;
+    font-size: 22px;
+  }
+
+  /* OPTIMISATION: Animation plus légère */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .processing {
+    animation: pulse 1.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* Spinner pour les boutons */
+  .spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Badge de compteur */
+  .counter-badge {
+    background: #4CAF50;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 18px;
+    font-weight: 700;
+    display: inline-block;
+    margin: 20px auto;
+    text-align: center;
+  }
+</style>
+
+  </head>
+  <body>
+    <div class="header">
+      <h1>📋 GESTION EXPOSANTS</h1>
+    </div>
+
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="🔍 Rechercher..." oninput="filtrerExposants()">
+    </div>
+
+    <div id="exposantList">
+      <div class="loading">⏳ Chargement...</div>
+    </div>
+
+    <script>
+      let exposants = [];
+      let filteredExposants = [];
+
+      function init() {
+        const startTime = performance.now();
+        
+        google.script.run
+          .withSuccessHandler((data) => {
+            const loadTime = Math.round(performance.now() - startTime);
+            console.log('✅ Données chargées en ' + loadTime + ' ms');
+            
+            if (!data || !Array.isArray(data)) {
+              document.getElementById('exposantList').innerHTML = 
+                '<div class="empty-state"><p>❌ Aucune donnée reçue</p></div>';
+              return;
+            }
+            
+            exposants = data;
+            filteredExposants = data;
+            afficherExposants(filteredExposants);
+          })
+          .withFailureHandler((error) => {
+            console.error('❌ Erreur:', error);
+            document.getElementById('exposantList').innerHTML = 
+              '<div class="empty-state"><p>❌ Erreur de chargement</p></div>';
+          })
+          .getExposants();
+      }
+
+      function afficherExposants(list) {
+        const container = document.getElementById('exposantList');
+        container.innerHTML = '';
+        
+        if (list.length === 0) {
+          container.innerHTML = '<div class="empty-state"><p>🔍 Aucun exposant trouvé</p></div>';
+          return;
+        }
+        
+        // Badge de compteur
+        const counter = document.createElement('div');
+        counter.className = 'counter-badge';
+        counter.textContent = list.length + ' exposant' + (list.length > 1 ? 's' : '');
+        counter.style.display = 'block';
+        container.appendChild(counter);
+        
+        // OPTIMISATION: Utiliser DocumentFragment pour réduire les reflows
+        const fragment = document.createDocumentFragment();
+        
+        list.forEach((exp, index) => {
+          const div = document.createElement('div');
+          div.className = 'exposant';
+          
+          const nomExposant = exp['Nom Exposant'].trim();
+          const uniqueId = 'exp-' + index;
+          
+          div.innerHTML = `
+            <h2>${escapeHtml(nomExposant)}</h2>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">📏 Tables linéaires</span>
+                <span class="info-value">${exp['Nb Tables Lineaire'] || 0}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">🪑 Tables de travail</span>
+                <span class="info-value">${exp['Nb Tables Travail'] || 0}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">💺 Chaises</span>
+                <span class="info-value">${exp['NB Chaises'] || 0}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">👔 Portants</span>
+                <span class="info-value">${exp['Nbre Portants'] || 0}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">✨ Guirlandes</span>
+                <span class="info-value">${exp['Nbre Guirlande'] || 0}</span>
+              </div>
+            </div>
+            <textarea id="comment-${uniqueId}" placeholder="💬 Commentaire..."></textarea>
+            <div class="button-group">
+              <button class="btn-arrivee" data-nom="${escapeHtml(nomExposant)}" data-id="${uniqueId}" onclick="enregistrer(this, 'arrivee')">✅ ARRIVÉE</button>
+              <button class="btn-depart" data-nom="${escapeHtml(nomExposant)}" data-id="${uniqueId}" onclick="enregistrer(this, 'depart')">🚪 DÉPART</button>
+            </div>
+          `;
+          
+          fragment.appendChild(div);
+        });
+        
+        // Ajouter tout d'un coup (une seule modification du DOM)
+        container.appendChild(fragment);
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // OPTIMISATION: Debounce pour la recherche
+      let searchTimeout;
+      function filtrerExposants() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          const query = document.getElementById('searchInput').value.toLowerCase();
+          filteredExposants = exposants.filter(e => 
+            e['Nom Exposant'].toLowerCase().includes(query)
+          );
+          afficherExposants(filteredExposants);
+        }, 300); // Attend 300ms après la dernière frappe
+      }
+
+      function enregistrer(button, type) {
+        const nom = button.getAttribute('data-nom');
+        const uniqueId = button.getAttribute('data-id');
+        const commentaire = document.getElementById(`comment-${uniqueId}`).value.trim();
+        const exposantDiv = button.closest('.exposant');
+        const buttons = exposantDiv.querySelectorAll('button');
+        
+        if (!nom) {
+          alert('⚠️ Merci de choisir un exposant.');
+          return;
+        }
+
+        // Désactiver tous les boutons pendant l'enregistrement
+        buttons.forEach(btn => btn.disabled = true);
+        
+        // Ajouter un spinner
+        const originalText = button.innerHTML;
+        button.innerHTML = '<span class="spinner"></span>' + originalText;
+
+        const startTime = performance.now();
+
+        google.script.run
+          .withSuccessHandler(() => {
+            const saveTime = Math.round(performance.now() - startTime);
+            console.log('✅ Enregistré en ' + saveTime + ' ms');
+            
+            buttons.forEach(btn => btn.disabled = false);
+            button.innerHTML = originalText;
+            alert('✅ Enregistrement réussi !');
+            document.getElementById(`comment-${uniqueId}`).value = '';
+          })
+          .withFailureHandler((error) => {
+            console.error('❌ Erreur:', error);
+            buttons.forEach(btn => btn.disabled = false);
+            button.innerHTML = originalText;
+            alert('❌ Erreur lors de l\'enregistrement');
+          })
+          .saveAction(nom, type, 'signature', commentaire);
+      }
+
+      window.onload = init;
+    </script>
+  </body>
+</html>
